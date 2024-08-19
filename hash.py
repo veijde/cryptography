@@ -1,7 +1,8 @@
 import requests
 import base64
-import hashlib
 import os
+from nacl.hash import blake2b
+import nacl.encoding
 
 BASE_URL = "https://g5qrhxi4ni.execute-api.eu-west-1.amazonaws.com/Prod/hash"
 
@@ -37,13 +38,12 @@ def solve_hash_challenge(challenge):
 
 def find_valid_prefix(message_bytes):
     while True:
-        prefix_bytes = os.urandom(4)  # Adjust length as needed
+        prefix_bytes = os.urandom(4)
         combined = prefix_bytes + message_bytes
-        hash_value = hashlib.blake2b(combined).digest()
+        hash_value = blake2b(combined, encoder=nacl.encoding.RawEncoder)
 
-        # Check if the first two bytes of the hash are 0x0000
         if hash_value[:2] == b'\x00\x00':
-            print(base64.b64encode(hash_value).decode('utf-8'))
+            print(hash_value)
             return prefix_bytes
 
 
